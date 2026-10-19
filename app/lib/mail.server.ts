@@ -50,3 +50,8 @@ export function listEmails(folder: Folder): Email[] {
 export function getEmail(id: string): Email | undefined {
   return emails.find((e) => e.id === id);
 }
+
+export function markRead(id: string): void {
+  const email = getEmail(id);
+  if (email) email.read = true;
+}

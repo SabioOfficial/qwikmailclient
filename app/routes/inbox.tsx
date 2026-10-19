@@ -1,5 +1,6 @@
 import { listEmails } from "~/lib/mail.server";
 import type { Route } from "./+types/inbox";
+import { Link } from "react-router";
 
 export function meta() {
   return [{ title: "Inbox" }];
@@ -21,11 +22,14 @@ export default function Inbox({ loaderData }: Route.ComponentProps) {
         <ul className="email-list">
           {emails.map((e) => (
             <li key={e.id}>
-              <div className={`email-row${e.read ? "" : " unread"}`}>
+              <Link
+                to={`/message/${e.id}`}
+                className={`email-row${e.read ? "" : " unread"}`}
+              >
                 <span>{e.from}</span>
                 <span>{e.subject}</span>
                 <span>{e.date.slice(0, 10)}</span>
-              </div>
+              </Link>
             </li>
           ))}
         </ul>
