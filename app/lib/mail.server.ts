@@ -74,3 +74,8 @@ export function sendEmail(input: {
   emails.push(email);
   return email;
 }
+
+export function deleteEmail(id: string): void {
+  const index = emails.findIndex((e) => e.id === id);
+  if (index !== -1) emails.splice(index, 1);
+}

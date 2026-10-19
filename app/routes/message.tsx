@@ -1,12 +1,18 @@
-import { getEmail, markRead } from "~/lib/mail.server";
+import { deleteEmail, getEmail, markRead } from "~/lib/mail.server";
 import type { Route } from "./+types/message";
-import { data, Link } from "react-router";
+import { data, Form, Link, redirect } from "react-router";
 
 export function loader({ params }: Route.LoaderArgs) {
   const email = getEmail(params.id);
   if (!email) throw data("Message not found", { status: 404 });
   markRead(email.id);
   return { email };
+}
+
+export function action({ params }: Route.ActionArgs) {
+  const email = getEmail(params.id);
+  deleteEmail(params.id);
+  return redirect(email?.folder === "sent" ? "/sent" : "/");
 }
 
 export default function Message({ loaderData }: Route.ComponentProps) {
@@ -28,6 +34,9 @@ export default function Message({ loaderData }: Route.ComponentProps) {
         <dd>{email.date.slice(0, 10)}</dd>
       </dl>
       <div className="message-body">{email.body}</div>
+      <Form method="post" className="delete-form">
+        <button type="submit">Delete</button>
+      </Form>
     </article>
   )
 }

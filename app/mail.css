@@ -152,3 +152,11 @@
   color: #b91c1c;
   margin: 0;
 }
+
+.delete-form {
+  margin-top: 24px;
+}
+
+.delete-form button {
+  background: #dc2626;
+}
