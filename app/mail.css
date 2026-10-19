@@ -106,3 +106,49 @@
   white-space: pre-wrap;
   line-height: 1.5;
 }
+
+.compose {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.compose label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.875rem;
+  color: #555555;
+}
+
+.compose input,
+.compose textarea {
+  padding: 8px 10px;
+  border: 1px solid #d4d4d4;
+  border-radius: 6px;
+  font: inherit;
+  color: #1a1a1a;
+  background: #ffffff;
+}
+
+.compose button,
+.delete-form button {
+  align-self: flex-start;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 6px;
+  background: #2563eb;
+  color: white;
+  font: inherit;
+  cursor: pointer;
+}
+
+.compose button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.error {
+  color: #b91c1c;
+  margin: 0;
+}

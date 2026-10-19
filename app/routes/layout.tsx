@@ -9,6 +9,8 @@ export default function Layout() {
         <NavLink to="/" end>
           Inbox
         </NavLink>
+        <NavLink to="/sent">Sent</NavLink>
+        <NavLink to="/compose">Compose</NavLink>
       </nav>
       <main className="content">
         <Outlet />

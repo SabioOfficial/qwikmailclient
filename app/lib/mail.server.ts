@@ -55,3 +55,22 @@ export function markRead(id: string): void {
   const email = getEmail(id);
   if (email) email.read = true;
 }
+
+export function sendEmail(input: {
+  to: string;
+  subject: string;
+  body: string;
+}): Email {
+  const email: Email = {
+    id: crypto.randomUUID(),
+    folder: "sent",
+    from: ME,
+    to: input.to,
+    subject: input.subject,
+    body: input.body,
+    date: new Date().toISOString(),
+    read: true,
+  };
+  emails.push(email);
+  return email;
+}

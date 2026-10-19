@@ -11,11 +11,12 @@ export function loader({ params }: Route.LoaderArgs) {
 
 export default function Message({ loaderData }: Route.ComponentProps) {
   const { email } = loaderData;
+  const isSent = email.folder === "sent";
 
   return (
     <article>
       <p>
-        <Link to="/">Inbox</Link>
+        <Link to={isSent ? "/sent" : "/"}>{isSent ? "Sent" : "Inbox"}</Link>
       </p>
       <h2>{email.subject}</h2>
       <dl className="message-meta">
