@@ -7,4 +7,7 @@ export default [
     route("compose", "routes/compose.tsx"),
     route("sent", "routes/sent.tsx"),
   ]),
+  route("auth/google", "routes/auth-google.tsx"),
+  route("auth/google/callback", "routes/auth-google-callback.tsx"),
+  route("auth/logout", "routes/auth-logout.tsx"),
 ] satisfies RouteConfig;

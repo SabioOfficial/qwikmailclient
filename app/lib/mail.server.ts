@@ -32,7 +32,7 @@ function seed(): Email[] {
       to: ME,
       subject: "idk vro what do i put in this",
       body: "i want to become a furry",
-      date: "6969-6-9T4:20:00Z",
+      date: "6969-06-09T04:20:00Z",
       read: true,
     }
   ]
