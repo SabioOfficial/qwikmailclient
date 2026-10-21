@@ -1,4 +1,3 @@
-import { sendEmail } from "~/lib/mail.server";
 import type { Route } from "./+types/compose";
 import { Form, redirect, useNavigation } from "react-router";
 import { getMailbox } from "~/lib/mailbox.server";

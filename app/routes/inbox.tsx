@@ -1,4 +1,3 @@
-import { listEmails } from "~/lib/mail.server";
 import type { Route } from "./+types/inbox";
 import { Link } from "react-router";
 import { getMailbox } from "~/lib/mailbox.server";
