@@ -39,8 +39,8 @@ function buildDocument(html: string, allowRemoteImages: boolean): string {
   `;
 }
 
-export function EmailHtml({ html }: { html: string }) {
-  const [remoteImages, setRemoteImages] = useState(false);
+export function EmailHtml({ html, loadImages = false }: { html: string; loadImages?: boolean; }) {
+  const [remoteImages, setRemoteImages] = useState(loadImages);
 
   return (
     <>

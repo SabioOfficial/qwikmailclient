@@ -2,13 +2,15 @@ import type { Route } from "./+types/message";
 import { data, Form, Link, redirect } from "react-router";
 import { EmailHtml } from "~/components/email-html";
 import { getMailbox } from "~/lib/mailbox.server";
+import { getSettings } from "~/lib/settings.server";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const mailbox = await getMailbox(request);
   const email = await mailbox.get(params.id);
   if (!email) throw data("Message not found", { status: 404 });
   if (!email.read) await mailbox.markRead(email.id);
-  return { email: { ...email, read: true } };
+  const settings = await getSettings(request);
+  return { email: { ...email, read: true }, loadImages: settings.loadImages };
 }
 
 export async function action({ request, params }: Route.ActionArgs) {
@@ -19,7 +21,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 }
 
 export default function Message({ loaderData }: Route.ComponentProps) {
-  const { email } = loaderData;
+  const { email, loadImages } = loaderData;
   const isSent = email.folder === "sent";
 
   return (
@@ -37,7 +39,7 @@ export default function Message({ loaderData }: Route.ComponentProps) {
         <dd>{email.date.slice(0, 10)}</dd>
       </dl>
       {email.html ? (
-        <EmailHtml key={email.id} html={email.html} />
+        <EmailHtml key={email.id} html={email.html} loadImages={loadImages} />
       ) : (
         <div className="message-body">{email.body}</div>
       )}
