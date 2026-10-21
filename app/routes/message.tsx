@@ -1,17 +1,20 @@
 import { deleteEmail, getEmail, markRead } from "~/lib/mail.server";
 import type { Route } from "./+types/message";
 import { data, Form, Link, redirect } from "react-router";
+import { getMailbox } from "~/lib/mailbox.server";
 
-export function loader({ params }: Route.LoaderArgs) {
-  const email = getEmail(params.id);
+export async function loader({ request, params }: Route.LoaderArgs) {
+  const mailbox = await getMailbox(request);
+  const email = await mailbox.get(params.id);
   if (!email) throw data("Message not found", { status: 404 });
-  markRead(email.id);
-  return { email };
+  if (!email.read) await mailbox.markRead(email.id);
+  return { email: { ...email, read: true } };
 }
 
-export function action({ params }: Route.ActionArgs) {
-  const email = getEmail(params.id);
-  deleteEmail(params.id);
+export async function action({ request, params }: Route.ActionArgs) {
+  const mailbox = await getMailbox(request);
+  const email = await mailbox.get(params.id);
+  await mailbox.remove(params.id);
   return redirect(email?.folder === "sent" ? "/sent" : "/");
 }
 

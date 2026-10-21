@@ -1,13 +1,15 @@
 import { listEmails } from "~/lib/mail.server";
 import type { Route } from "./+types/sent";
 import { Link } from "react-router";
+import { getMailbox } from "~/lib/mailbox.server";
 
 export function meta() {
   return [{ title: "Sent" }];
 }
 
-export function loader() {
-  return { emails: listEmails("sent") };
+export async function loader({ request }: Route.LoaderArgs) {
+  const mailbox = await getMailbox(request);
+  return { emails: await mailbox.list("sent") };
 }
 
 export default function Sent({ loaderData }: Route.ComponentProps) {

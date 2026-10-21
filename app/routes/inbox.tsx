@@ -1,13 +1,15 @@
 import { listEmails } from "~/lib/mail.server";
 import type { Route } from "./+types/inbox";
 import { Link } from "react-router";
+import { getMailbox } from "~/lib/mailbox.server";
 
 export function meta() {
   return [{ title: "Inbox" }];
 }
 
-export function loader() {
-  return { emails: listEmails("inbox") };
+export async function loader({ request }: Route.LoaderArgs) {
+  const mailbox = await getMailbox(request);
+  return { emails: await mailbox.list("inbox") };
 }
 
 export default function Inbox({ loaderData }: Route.ComponentProps) {

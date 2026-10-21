@@ -1,6 +1,7 @@
 import { sendEmail } from "~/lib/mail.server";
 import type { Route } from "./+types/compose";
 import { Form, redirect, useNavigation } from "react-router";
+import { getMailbox } from "~/lib/mailbox.server";
 
 export function meta() {
   return [{ title: "Compose" }];
@@ -16,7 +17,8 @@ export async function action({ request }: Route.ActionArgs) {
     return { error: "Please enter a valid recipient address." };
   }
 
-  sendEmail({ to, subject: subject || "(no subject)", body });
+  const mailbox = await getMailbox(request);
+  await mailbox.send({ to, subject: subject || "(no subject)", body });
   return redirect("/sent");
 }
 
