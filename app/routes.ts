@@ -6,6 +6,7 @@ export default [
     route("message/:id", "routes/message.tsx"),
     route("compose", "routes/compose.tsx"),
     route("sent", "routes/sent.tsx"),
+    route("settings", "routes/settings.tsx"),
   ]),
   route("auth/google", "routes/auth-google.tsx"),
   route("auth/google/callback", "routes/auth-google-callback.tsx"),

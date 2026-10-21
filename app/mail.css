@@ -214,3 +214,52 @@
   font-size: 0.8125rem;
   color: #777777;
 }
+
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings .checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.settings .checkbox input {
+  margin-top: 4px;
+}
+
+.settings .checkbox span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings .checkbox small {
+  color: #777777;
+  font-size: 0.8125rem;
+}
+
+.settings button {
+  align-self: flex-start;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 6px;
+  background: #2563eb;
+  color: #ffffff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.settings button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.saved {
+  margin: 0;
+  color: #15803d;
+}

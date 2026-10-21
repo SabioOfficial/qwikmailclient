@@ -50,6 +50,7 @@ export default function Layout({ loaderData }: Route.ComponentProps) {
         </NavLink>
         <NavLink to="/sent">Sent</NavLink>
         <NavLink to="/compose">Compose</NavLink>
+        <NavLink to="/settings">Settings</NavLink>
         <div className="account">
           {email ? (
             <>
