@@ -1,5 +1,6 @@
 import type { Route } from "./+types/message";
 import { data, Form, Link, redirect } from "react-router";
+import { EmailHtml } from "~/components/email-html";
 import { getMailbox } from "~/lib/mailbox.server";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
@@ -35,7 +36,11 @@ export default function Message({ loaderData }: Route.ComponentProps) {
         <dt>Date</dt>
         <dd>{email.date.slice(0, 10)}</dd>
       </dl>
-      <div className="message-body">{email.body}</div>
+      {email.html ? (
+        <EmailHtml key={email.id} html={email.html} />
+      ) : (
+        <div className="message-body">{email.body}</div>
+      )}
       <Form method="post" className="delete-form">
         <button type="submit">Delete</button>
       </Form>

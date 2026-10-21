@@ -7,6 +7,7 @@ export interface Email {
   to: string;
   subject: string;
   body: string;
+  html?: string;
   date: string;
   read: boolean;
 }

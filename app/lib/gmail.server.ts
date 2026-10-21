@@ -116,6 +116,7 @@ function toEmail(msg: GmailMessage, folder?: Folder): Email {
     to: header(msg, "To"),
     subject: header(msg, "Subject") || "(no subject)",
     body: extractBody(msg),
+    html: findPart(msg.payload, "text/html") ?? undefined,
     date: new Date(Number(msg.internalDate)).toISOString(),
     read: !labels.includes("UNREAD"),
   };
