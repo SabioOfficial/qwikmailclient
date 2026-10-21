@@ -1,7 +1,7 @@
 import { data } from "react-router";
 import { deleteEmail, getEmail, listEmails, markRead, sendEmail, type Email, type Folder } from "./mail.server";
 import { getSession, type GoogleTokens } from "./session.server";
-import { getGmail, listGmail, markGmailRead } from "./gmail.server";
+import { getGmail, listGmail, markGmailRead, sendGmail, trashGmail } from "./gmail.server";
 
 export interface SendInput {
   to: string;
@@ -39,8 +39,8 @@ function gmailMailbox(tokens: GoogleTokens): Mailbox {
     list: (folder) => listGmail(tokens, folder),
     get: (id) => getGmail(tokens, id),
     markRead: (id) => markGmailRead(tokens, id),
-    send: async () => notYet("Sending"),
-    remove: async () => notYet("Deleting"),
+    send: (input) => sendGmail(tokens, input),
+    remove: (id) => trashGmail(tokens, id),
   }
 }
 

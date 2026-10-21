@@ -2,6 +2,7 @@ import { data } from "react-router";
 import { refreshAccessToken } from "./google.server";
 import type { Email, Folder } from "./mail.server";
 import type { GoogleTokens } from "./session.server";
+import type { SendInput } from "./mailbox.server";
 
 const LABELS: Record<Folder, string> = { inbox: "INBOX", sent: "SENT" };
 const refreshed = new Map<string, { accessToken: string, expiresAt: number }>();
@@ -142,5 +143,42 @@ export async function markGmailRead(tokens: GoogleTokens, id: string): Promise<v
   await gmailFetch(tokens, `/messages/${encodeURIComponent(id)}/modify`, {
     method: "POST",
     body: JSON.stringify({ removeLabelIds: ["UNREAD"] }),
+  });
+}
+
+function cleanHeader(value: string): string {
+  return value.replace(/[\r\n]+/g, " ").trim();
+}
+
+function encodeHeader(value: string): string {
+  return /^[\x20-\x7e]*$/.test(value) ? value : `=?UTF-8?B?${Buffer.from(value, "utf-8").toString("base64")}?=`;
+}
+
+function buildRaw({ to, subject, body }: SendInput): string {
+  const encodedBody = Buffer.from(body, "utf-8").toString("base64").match(/.{1,76}/g)?.join("\r\n") ?? "";
+
+  const message = [
+    `To: ${cleanHeader(to)}`,
+    `Subject: ${encodeHeader(cleanHeader(subject))}`,
+    "MIME-Version: 1.0",
+    'Content-Type: text/plain; charset="UTF-8"',
+    "Content-Transfer-Encoding: base64",
+    "",
+    encodedBody,
+  ].join("\r\n");
+
+  return Buffer.from(message, "utf-8").toString("base64url");
+}
+
+export async function sendGmail(tokens: GoogleTokens, input: SendInput): Promise<void> {
+  await gmailFetch(tokens, "/messages/send", {
+    method: "POST",
+    body: JSON.stringify({ raw: buildRaw(input) }),
+  });
+}
+
+export async function trashGmail(tokens: GoogleTokens, id: string): Promise<void> {
+  await gmailFetch(tokens, `/messages/${encodeURIComponent(id)}/trash`, {
+    method: "POST",
   });
 }
