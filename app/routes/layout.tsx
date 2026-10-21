@@ -1,4 +1,4 @@
-import { Form, NavLink, Outlet } from "react-router";
+import { Form, isRouteErrorResponse, NavLink, Outlet } from "react-router";
 import "../mail.css";
 import type { Route } from "./+types/layout";
 import { getSession } from "~/lib/session.server";
@@ -10,6 +10,32 @@ export async function loader({ request }: Route.LoaderArgs) {
     email: session.get("google")?.email ?? null,
     gmailConfigured: isGoogleConfigured(),
   };
+}
+
+export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
+  const message = isRouteErrorResponse(error) && typeof error.data === "string" ? error.data : "Something went wrong.";
+
+  return (
+    <div className="app">
+      <nav className="sidebar">
+        <h1>QwikMailClient</h1>
+        <NavLink to="/" end>
+          Inbox
+        </NavLink>
+        <div className="account">
+          <Form method="post" action="/auth/logout" reloadDocument>
+            <button type="submit" className="link-button">
+              Disconnect Gmail
+            </button>
+          </Form>
+        </div>
+      </nav>
+      <main className="content">
+        <h2>Error</h2>
+        <p className="error">{message}</p>
+      </main>
+    </div>
+  );
 }
 
 export default function Layout({ loaderData }: Route.ComponentProps) {

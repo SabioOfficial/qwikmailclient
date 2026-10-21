@@ -1,4 +1,7 @@
+import { data } from "react-router";
 import { deleteEmail, getEmail, listEmails, markRead, sendEmail, type Email, type Folder } from "./mail.server";
+import { getSession, type GoogleTokens } from "./session.server";
+import { getGmail, listGmail, markGmailRead } from "./gmail.server";
 
 export interface SendInput {
   to: string;
@@ -26,6 +29,23 @@ const demoMailbox: Mailbox = {
   remove: async (id) => deleteEmail(id),
 };
 
+function notYet(action: string): never {
+  throw data(`${action} through Gmail isn't implemented yet.`, { status: 501 });
+}
+
+function gmailMailbox(tokens: GoogleTokens): Mailbox {
+  return {
+    source: "gmail",
+    list: (folder) => listGmail(tokens, folder),
+    get: (id) => getGmail(tokens, id),
+    markRead: (id) => markGmailRead(tokens, id),
+    send: async () => notYet("Sending"),
+    remove: async () => notYet("Deleting"),
+  }
+}
+
 export async function getMailbox(request: Request): Promise<Mailbox> {
-  return demoMailbox;
+  const session = await getSession(request.headers.get("Cookie"));
+  const tokens = session.get("google");
+  return tokens ? gmailMailbox(tokens) : demoMailbox;
 }
