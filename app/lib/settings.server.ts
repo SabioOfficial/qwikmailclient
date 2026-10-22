@@ -1,11 +1,19 @@
 import { createCookie } from "react-router";
 
+export type Theme = "system" | "light" | "dark";
+
 export interface Settings {
   loadImages: boolean;
+  theme: Theme;
 }
 
 export const defaultSettings: Settings = {
   loadImages: false,
+  theme: "system",
+}
+
+export function isTheme(value: unknown): value is Theme {
+  return value === "system" || value === "light" || value === "dark";
 }
 
 const cookie = createCookie("__mail_settings", {
@@ -21,6 +29,7 @@ export async function getSettings(request: Request): Promise<Settings> {
   return {
     ...defaultSettings,
     loadImages: value?.loadImages === true,
+    theme: isTheme(value?.theme) ? value.theme : defaultSettings.theme,
   };
 }
 

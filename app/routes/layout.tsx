@@ -3,12 +3,15 @@ import "../mail.css";
 import type { Route } from "./+types/layout";
 import { getSession } from "~/lib/session.server";
 import { isGoogleConfigured } from "~/lib/env.server";
+import { getSettings } from "~/lib/settings.server";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const session = await getSession(request.headers.get("Cookie"));
+  const settings = await getSettings(request);
   return {
     email: session.get("google")?.email ?? null,
     gmailConfigured: isGoogleConfigured(),
+    theme: settings.theme,
   };
 }
 
@@ -16,7 +19,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   const message = isRouteErrorResponse(error) && typeof error.data === "string" ? error.data : "Something went wrong.";
 
   return (
-    <div className="app">
+    <div className="app" data-theme="system">
       <nav className="sidebar">
         <h1>QwikMailClient</h1>
         <NavLink to="/" end>
@@ -39,10 +42,10 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
 }
 
 export default function Layout({ loaderData }: Route.ComponentProps) {
-  const { email, gmailConfigured } = loaderData;
+  const { email, gmailConfigured, theme } = loaderData;
 
   return (
-    <div className="app">
+    <div className="app" data-theme={theme}>
       <nav className="sidebar">
         <h1>QwikMailClient</h1>
         <NavLink to="/" end>
