@@ -16,13 +16,19 @@ function buildDocument(html: string, allowRemoteImages: boolean): string {
         <meta http-equiv="Content-Security-Policy" content="default-src 'none'; ${imgSrc}; style-src 'unsafe-inline'; font-src data:">
         <base target="_blank">
         <style>
+          :root {
+            color-scheme: light;
+            --email-bg: #ffffff;
+            --email-fg: #1a1a1a;
+          }
+
           body {
             margin: 0;
             padding: 12px;
             font-family: sans-serif;
             font-size: 14px;
-            color: #1a1a1a;
-            background: #ffffff;
+            color: var(--email-fg);
+            background: var(--email-bg);
             overflow-wrap: anywhere;
           }
 
