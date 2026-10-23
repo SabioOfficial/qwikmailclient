@@ -29,7 +29,7 @@ export default function Message({ loaderData }: Route.ComponentProps) {
   return (
     <article>
       <p>
-        <Link to={isSent ? "/sent" : "/"}>{isSent ? "Sent" : "Inbox"}</Link>
+        <Link to={isSent ? "/sent" : "/"}>Back</Link>
       </p>
       <h2>{email.subject}</h2>
       <dl className="message-meta">
