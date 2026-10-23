@@ -142,7 +142,8 @@
 
 .email-row {
   display: grid;
-  grid-template-columns: 300px 1fr 130px;
+  grid-template-columns: 36px 300px 1fr 130px;
+  align-items: center;
   gap: 12px;
   padding: 10px 14px;
   color: inherit;
@@ -161,6 +162,28 @@
 
 .email-row.unread {
   font-weight: 700;
+}
+
+.email-row .avatar {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: hsl(var(--avatar-hue) 55% 42%);
+  color: var(--accent-fg);
+  font-weight: 600;
+  user-select: none;
+}
+
+.avatar img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .address-email {

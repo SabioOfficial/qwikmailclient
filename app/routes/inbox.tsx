@@ -4,6 +4,7 @@ import { Link } from "react-router";
 import { RelativeTime } from "~/components/relative-time";
 import { fullLabel } from "~/lib/address";
 import { getMailbox } from "~/lib/mailbox.server";
+import { SenderAvatar } from "~/components/sender-avatar";
 
 export function meta() {
   return [{ title: "Inbox" }];
@@ -30,6 +31,7 @@ export default function Inbox({ loaderData }: Route.ComponentProps) {
                 to={`/message/${e.id}`}
                 className={`email-row${e.read ? "" : " unread"}`}
               >
+                <SenderAvatar value={e.from} />
                 <span>
                   <AddressLabel value={e.from} />
                 </span>

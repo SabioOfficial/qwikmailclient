@@ -4,6 +4,7 @@ import { Link } from "react-router";
 import { RelativeTime } from "~/components/relative-time";
 import { listLabel } from "~/lib/address";
 import { getMailbox } from "~/lib/mailbox.server";
+import { SenderAvatar } from "~/components/sender-avatar";
 
 export function meta() {
   return [{ title: "Sent" }];
@@ -27,6 +28,7 @@ export default function Sent({ loaderData }: Route.ComponentProps) {
           {emails.map((e) => (
             <li key={e.id}>
               <Link to={`/message/${e.id}`} className="email-row">
+                <SenderAvatar value={e.to} />
                 <span>
                   To: <AddressLabel value={e.to} />
                 </span>
