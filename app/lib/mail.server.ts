@@ -25,16 +25,6 @@ function seed(): Email[] {
       body: "Thanks for trying this lightweight email client.\n\nYou can read, compose and delete messages.",
       date: "2026-10-19T18:15:23Z",
       read: false,
-    },
-    {
-      id: "2",
-      folder: "inbox",
-      from: "funnytemporary@example.com",
-      to: ME,
-      subject: "idk vro what do i put in this",
-      body: "i want to become a furry",
-      date: "6969-06-09T04:20:00Z",
-      read: true,
     }
   ]
 }
