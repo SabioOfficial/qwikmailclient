@@ -1,6 +1,7 @@
 import type { Route } from "./+types/message";
 import { data, Form, Link, redirect } from "react-router";
 import { EmailHtml } from "~/components/email-html";
+import { fullLabel } from "~/lib/address";
 import { getMailbox } from "~/lib/mailbox.server";
 import { getSettings } from "~/lib/settings.server";
 
@@ -32,9 +33,9 @@ export default function Message({ loaderData }: Route.ComponentProps) {
       <h2>{email.subject}</h2>
       <dl className="message-meta">
         <dt>From</dt>
-        <dd>{email.from}</dd>
+        <dd>{fullLabel(email.from)}</dd>
         <dt>To</dt>
-        <dd>{email.to}</dd>
+        <dd>{fullLabel(email.to)}</dd>
         <dt>Date</dt>
         <dd>{email.date.slice(0, 10)}</dd>
       </dl>

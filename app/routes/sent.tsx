@@ -1,5 +1,6 @@
 import type { Route } from "./+types/sent";
 import { Link } from "react-router";
+import { listLabel } from "~/lib/address";
 import { getMailbox } from "~/lib/mailbox.server";
 
 export function meta() {
@@ -24,7 +25,7 @@ export default function Sent({ loaderData }: Route.ComponentProps) {
           {emails.map((e) => (
             <li key={e.id}>
               <Link to={`/message/${e.id}`} className="email-row">
-                <span>To: {e.to}</span>
+                <span>To: {listLabel(e.to)}</span>
                 <span>{e.subject}</span>
                 <span>{e.date.slice(0, 10)}</span>
               </Link>
