@@ -2,7 +2,6 @@ import { AddressLabel } from "~/components/address-label";
 import type { Route } from "./+types/sent";
 import { Link } from "react-router";
 import { RelativeTime } from "~/components/relative-time";
-import { listLabel } from "~/lib/address";
 import { getMailbox } from "~/lib/mailbox.server";
 import { SenderAvatar } from "~/components/sender-avatar";
 
@@ -12,7 +11,8 @@ export function meta() {
 
 export async function loader({ request }: Route.LoaderArgs) {
   const mailbox = await getMailbox(request);
-  return { emails: await mailbox.list("sent") };
+  const page = await mailbox.list("sent");
+  return { emails: page.emails };
 }
 
 export default function Sent({ loaderData }: Route.ComponentProps) {

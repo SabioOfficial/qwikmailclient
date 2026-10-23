@@ -12,7 +12,8 @@ export function meta() {
 
 export async function loader({ request }: Route.LoaderArgs) {
   const mailbox = await getMailbox(request);
-  return { emails: await mailbox.list("inbox") };
+  const page = await mailbox.list("inbox");
+  return { emails: page.emails };
 }
 
 export default function Inbox({ loaderData }: Route.ComponentProps) {
