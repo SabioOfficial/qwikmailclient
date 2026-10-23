@@ -132,11 +132,17 @@
 
 .email-list li + li {
   border-top: 1px solid var(--border);
+  transition: border-color 150ms ease;
+}
+
+.email-list li + li:hover,
+.email-list li:hover + li {
+  border-top-color: var(--accent);
 }
 
 .email-row {
   display: grid;
-  grid-template-columns: 260px 1fr 130px;
+  grid-template-columns: 300px 1fr 130px;
   gap: 12px;
   padding: 10px 14px;
   color: inherit;
@@ -155,6 +161,12 @@
 
 .email-row.unread {
   font-weight: 700;
+}
+
+.address-email {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--muted);
 }
 
 .message-meta {

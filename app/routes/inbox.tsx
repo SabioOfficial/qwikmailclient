@@ -1,3 +1,4 @@
+import { AddressLabel } from "~/components/address-label";
 import type { Route } from "./+types/inbox";
 import { Link } from "react-router";
 import { RelativeTime } from "~/components/relative-time";
@@ -29,7 +30,9 @@ export default function Inbox({ loaderData }: Route.ComponentProps) {
                 to={`/message/${e.id}`}
                 className={`email-row${e.read ? "" : " unread"}`}
               >
-                <span>{fullLabel(e.from)}</span>
+                <span>
+                  <AddressLabel value={e.from} />
+                </span>
                 <span>{e.subject}</span>
                 <span>
                   <RelativeTime date={e.date} />

@@ -1,3 +1,4 @@
+import { AddressLabel } from "~/components/address-label";
 import type { Route } from "./+types/sent";
 import { Link } from "react-router";
 import { RelativeTime } from "~/components/relative-time";
@@ -26,7 +27,9 @@ export default function Sent({ loaderData }: Route.ComponentProps) {
           {emails.map((e) => (
             <li key={e.id}>
               <Link to={`/message/${e.id}`} className="email-row">
-                <span>To: {listLabel(e.to)}</span>
+                <span>
+                  To: <AddressLabel value={e.to} />
+                </span>
                 <span>{e.subject}</span>
                 <span>
                   <RelativeTime date={e.date} />
