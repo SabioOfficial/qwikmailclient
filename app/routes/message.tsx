@@ -1,6 +1,7 @@
 import type { Route } from "./+types/message";
 import { data, Form, Link, redirect } from "react-router";
 import { EmailHtml } from "~/components/email-html";
+import { RelativeTime } from "~/components/relative-time";
 import { fullLabel } from "~/lib/address";
 import { getMailbox } from "~/lib/mailbox.server";
 import { getSettings } from "~/lib/settings.server";
@@ -37,7 +38,9 @@ export default function Message({ loaderData }: Route.ComponentProps) {
         <dt>To</dt>
         <dd>{fullLabel(email.to)}</dd>
         <dt>Date</dt>
-        <dd>{email.date.slice(0, 10)}</dd>
+        <dd>
+          <RelativeTime date={email.date} />
+        </dd>
       </dl>
       {email.html ? (
         <EmailHtml key={email.id} html={email.html} loadImages={loadImages} />

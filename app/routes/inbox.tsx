@@ -1,5 +1,6 @@
 import type { Route } from "./+types/inbox";
 import { Link } from "react-router";
+import { RelativeTime } from "~/components/relative-time";
 import { fullLabel } from "~/lib/address";
 import { getMailbox } from "~/lib/mailbox.server";
 
@@ -30,7 +31,9 @@ export default function Inbox({ loaderData }: Route.ComponentProps) {
               >
                 <span>{fullLabel(e.from)}</span>
                 <span>{e.subject}</span>
-                <span>{e.date.slice(0, 10)}</span>
+                <span>
+                  <RelativeTime date={e.date} />
+                </span>
               </Link>
             </li>
           ))}
