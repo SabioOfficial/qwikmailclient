@@ -5,7 +5,7 @@ import { MessageStar } from "~/components/message-star";
 import { RelativeTime } from "~/components/relative-time";
 import { fullLabel } from "~/lib/address";
 import { getMailbox } from "~/lib/mailbox.server";
-import { getSettings } from "~/lib/settings.server";
+import { getSettings, resolveEmailMode } from "~/lib/settings.server";
 
 export async function loader({ request, params }: Route.LoaderArgs) {
   const mailbox = await getMailbox(request);
@@ -13,7 +13,11 @@ export async function loader({ request, params }: Route.LoaderArgs) {
   if (!email) throw data("Message not found", { status: 404 });
   if (!email.read) await mailbox.markRead(email.id);
   const settings = await getSettings(request);
-  return { email: { ...email, read: true }, loadImages: settings.loadImages };
+  return {
+    email: { ...email, read: true },
+    loadImages: settings.loadImages,
+    emailMode: resolveEmailMode(settings),
+  };
 }
 
 export async function action({ request, params }: Route.ActionArgs) {
@@ -24,7 +28,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 }
 
 export default function Message({ loaderData }: Route.ComponentProps) {
-  const { email, loadImages } = loaderData;
+  const { email, loadImages, emailMode } = loaderData;
   const isSent = email.folder === "sent";
 
   return (
@@ -47,7 +51,7 @@ export default function Message({ loaderData }: Route.ComponentProps) {
         </dd>
       </dl>
       {email.html ? (
-        <EmailHtml key={email.id} html={email.html} loadImages={loadImages} />
+        <EmailHtml key={email.id} html={email.html} loadImages={loadImages} mode={emailMode} />
       ) : (
         <div className="message-body">{email.body}</div>
       )}
@@ -55,5 +59,5 @@ export default function Message({ loaderData }: Route.ComponentProps) {
         <button type="submit">Delete</button>
       </Form>
     </article>
-  )
+  );
 }

@@ -1,9 +1,14 @@
-import { getSettings, isTheme, serializeSettings, type Settings } from "~/lib/settings.server";
+import { getSettings, isEmailTheme, isTheme, serializeSettings, type Settings } from "~/lib/settings.server";
 import type { Route } from "./+types/settings";
 import { data, Form, useNavigation } from "react-router";
 
 const THEME_OPTIONS = [
   { value: "system", label: "System" },
+  { value: "light", label: "Light" },
+  { value: "dark", label: "Dark" },
+] as const;
+
+const EMAIL_THEME_OPTIONS = [
   { value: "light", label: "Light" },
   { value: "dark", label: "Dark" },
 ] as const;
@@ -19,9 +24,11 @@ export async function loader({ request }: Route.LoaderArgs) {
 export async function action({ request }: Route.ActionArgs) {
   const form = await request.formData();
   const theme = form.get("theme");
+  const emailTheme = form.get("emailTheme");
   const settings: Settings = {
     loadImages: form.get("loadImages") === "on",
     theme: isTheme(theme) ? theme : "system",
+    emailTheme: isEmailTheme(emailTheme) ? emailTheme : "light",
   };
 
   return data(
@@ -49,6 +56,25 @@ export default function Settings({ loaderData, actionData }: Route.ComponentProp
                   name="theme"
                   value={option.value}
                   defaultChecked={loaderData.settings.theme === option.value}
+                />
+                <span>
+                  <strong>{option.label}</strong>
+                </span>
+              </label>
+            ))}
+          </fieldset>
+          <fieldset>
+            <legend>Email content</legend>
+            <p className="settings-note">
+              How HTML emails are displayed. Theme follows the app theme above.
+            </p>
+            {EMAIL_THEME_OPTIONS.map((option) => (
+              <label key={option.value} className="checkbox">
+                <input
+                  type="radio"
+                  name="emailTheme"
+                  value={option.value}
+                  defaultChecked={loaderData.settings.emailTheme === option.value}
                 />
                 <span>
                   <strong>{option.label}</strong>
