@@ -392,3 +392,11 @@
   padding: 0;
   font-weight: 600;
 }
+
+.list-footer {
+  min-height: 56px;
+  padding: 16px 0;
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}

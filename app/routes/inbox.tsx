@@ -5,6 +5,8 @@ import { RelativeTime } from "~/components/relative-time";
 import { fullLabel } from "~/lib/address";
 import { getMailbox } from "~/lib/mailbox.server";
 import { SenderAvatar } from "~/components/sender-avatar";
+import { useInfiniteEmails } from "~/lib/use-infinite-emails";
+import { ListFooter } from "~/components/list-footer";
 
 export function meta() {
   return [{ title: "Inbox" }];
@@ -12,12 +14,11 @@ export function meta() {
 
 export async function loader({ request }: Route.LoaderArgs) {
   const mailbox = await getMailbox(request);
-  const page = await mailbox.list("inbox");
-  return { emails: page.emails };
+  return { page: await mailbox.list("inbox") };
 }
 
 export default function Inbox({ loaderData }: Route.ComponentProps) {
-  const { emails } = loaderData;
+  const { emails, footer } = useInfiniteEmails("inbox", loaderData.page);
 
   return (
     <>
@@ -45,6 +46,7 @@ export default function Inbox({ loaderData }: Route.ComponentProps) {
           ))}
         </ul>
       )}
+      <ListFooter {...footer} />
     </>
   )
 }

@@ -5,6 +5,19 @@ import type { GoogleTokens } from "./session.server";
 import type { EmailPage, SendInput } from "./mailbox.server";
 
 const LABELS: Record<Folder, string> = { inbox: "INBOX", sent: "SENT" };
+
+interface LimiterState {
+  spent: { at: number; cost: number }[];
+  blockedUntil: number;
+}
+
+const globals = globalThis as unknown as {
+  __gmailLimiter?: LimiterState;
+  __gmailMeta?: Map<string, { msg: GmailMessage, at: number }>;
+};
+const limiter: LimiterState = (globals.__gmailLimiter ??= { spent: [], blockedUntil: 0 });
+const metaCache = (globals.__gmailMeta ??= new Map<string, { msg: GmailMessage; at: number }>());
+
 const refreshed = new Map<string, { accessToken: string, expiresAt: number }>();
 
 async function getAccessToken(tokens: GoogleTokens): Promise<string> {
@@ -25,29 +38,53 @@ async function getAccessToken(tokens: GoogleTokens): Promise<string> {
   }
 }
 
-interface Bucket {
-  units: number;
-  updatedAt: number;
-}
-
-const buckets = new Map<string, Bucket>();
-
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
-async function acquire(key: string, cost: number): Promise<void> {
-  const bucket = buckets.get(key) ?? { units: 100, updatedAt: Date.now() };
-  buckets.set(key, bucket);
+function tooMany(ms: number): never {
+  const seconds = Math.max(1, Math.ceil(ms / 1000));
+  throw data(`Too many Gmail requests in a short time. Try again in about ${seconds} seconds.`, { status: 429 });
+}
 
+function totalSince(since: number): number {
+  let sum = 0;
+  for (const entry of limiter.spent) {
+    if (entry.at > since) sum += entry.cost;
+  }
+  return sum;
+}
+
+export function unitsLastMinute(): number {
+  return totalSince(Date.now() - 60000);
+}
+
+async function acquire(cost: number): Promise<void> {
   for (; ;) {
     const now = Date.now();
-    bucket.units = Math.min(100, bucket.units + ((now - bucket.updatedAt) / 1000) * 100);
-    bucket.updatedAt = now;
+    if (now < limiter.blockedUntil) tooMany(limiter.blockedUntil - now);
 
-    if (bucket.units >= cost) {
-      bucket.units -= cost;
+    limiter.spent = limiter.spent.filter((entry) => entry.at > now - 60000);
+
+    let wait = 0;
+    const minuteTotal = totalSince(now - 60000);
+    if (minuteTotal + cost > 700) {
+      let remaining = minuteTotal;
+      wait = 60000;
+      for (const entry of limiter.spent) {
+        remaining -= entry.cost;
+        if (remaining + cost <= 700) {
+          wait = entry.at + 60000 - now + 1;
+          break;
+        }
+      }
+    }
+    if (totalSince(now - 1000) + cost > 100) wait = Math.max(wait, 250);
+
+    if (wait === 0) {
+      limiter.spent.push({ at: now, cost });
       return;
     }
-    await sleep(Math.ceil(((cost - bucket.units) / 100) * 1000));
+    if (wait > 8000) tooMany(wait);
+    await sleep(wait);
   }
 }
 
@@ -59,7 +96,7 @@ function retryDelay(res: Response, attempt: number): number {
 
 async function gmailFetch<T>(tokens: GoogleTokens, path: string, init: RequestInit = {}, cost: number = 5): Promise<T> {
   for (let attempt = 0; ; attempt++) {
-    await acquire(tokens.refreshToken, cost);
+    await acquire(cost);
     const accessToken = await getAccessToken(tokens);
     const res = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me${path}`, {
       ...init,
@@ -74,14 +111,26 @@ async function gmailFetch<T>(tokens: GoogleTokens, path: string, init: RequestIn
     if (res.status === 404) throw data("Message not found", { status: 404 });
 
     const body = await res.text();
-    const rateLimited = res.status === 429;
-    const transient = res.status === 503;
+    const rateLimited = res.status === 429 || (res.status === 403 && /rateLimitExceeded/i.test(body));
 
-    if ((rateLimited || transient) && attempt < 3) {
+    if (rateLimited) {
+      console.error(`[gmail] rate limited (${res.status}):`, body);
+      const perMinute = /per minute/i.test(body);
+      const delay = perMinute ? 65000 : retryDelay(res, attempt);
+      if (perMinute || attempt >= 2) {
+        limiter.blockedUntil = Date.now() + delay;
+        tooMany(delay);
+      }
+      await sleep(delay);
+      continue;
+    }
+
+    if (res.status === 503 && attempt < 2) {
       await sleep(retryDelay(res, attempt));
       continue;
     }
-    if (rateLimited) throw data("Gmail is limiting requests right now. Please wait a few seconds and try again.", {status: 429});
+
+    console.error(`[gmail] error (${res.status}) on ${path.split("?")[0]}:`, body);
     throw data(`Gmail API error (${res.status}): ${body}`, { status: res.status === 401 ? 401 : 502 });
   }
 }
@@ -89,16 +138,47 @@ async function gmailFetch<T>(tokens: GoogleTokens, path: string, init: RequestIn
 async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
   const results: R[] = new Array(items.length);
   let next = 0;
+  let failed = false;
 
   async function worker() {
-    while (next < items.length) {
+    while (!failed && next < items.length) {
       const i = next++;
-      results[i] = await fn(items[i]);
+      try {
+        results[i] = await fn(items[i]);
+      } catch (error) {
+        failed = true;
+        throw error;
+      }
     }
   }
 
   await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
   return results;
+}
+
+function cacheKey(tokens: GoogleTokens, id: string): string {
+  return `${tokens.email}:${id}`;
+}
+
+function cacheGet(tokens: GoogleTokens, id: string): GmailMessage | null {
+  const key = cacheKey(tokens, id);
+  const hit = metaCache.get(key);
+  if (!hit) return null;
+  if (Date.now() - hit.at > 300000) {
+    metaCache.delete(key);
+    return null;
+  }
+  return hit.msg;
+}
+
+function cacheSet(tokens: GoogleTokens, msg: GmailMessage): void {
+  const key = cacheKey(tokens, msg.id);
+  metaCache.delete(key);
+  if (metaCache.size >= 2000) {
+    const oldest = metaCache.keys().next().value;
+    if (oldest !== undefined) metaCache.delete(oldest);
+  }
+  metaCache.set(key, { msg, at: Date.now() });
 }
 
 interface GmailPart {
@@ -188,8 +268,12 @@ export async function listGmail(tokens: GoogleTokens, folder: Folder, pageToken:
   }>(tokens, `/messages?${params}`);
 
   const found = await mapLimit(list.messages ?? [], 5, async ({ id }) => {
+    const cached = cacheGet(tokens, id);
+    if (cached) return toEmail(cached, folder);
+
     try {
       const msg = await gmailFetch<GmailMessage>(tokens, `/messages/${id}?format=metadata&metadataHeaders=From&metadataHeaders=To&metadataHeaders=Subject`);
+      cacheSet(tokens, msg);
       return toEmail(msg, folder);
     } catch (error) {
       if (isNotFound(error)) return null;
@@ -216,6 +300,9 @@ export async function markGmailRead(tokens: GoogleTokens, id: string): Promise<v
     method: "POST",
     body: JSON.stringify({ removeLabelIds: ["UNREAD"] }),
   });
+
+  const hit = metaCache.get(cacheKey(tokens, id));
+  if (hit) hit.msg.labelIds = (hit.msg.labelIds ?? []).filter((l) => l !== "UNREAD");
 }
 
 function cleanHeader(value: string): string {
@@ -255,4 +342,5 @@ export async function trashGmail(tokens: GoogleTokens, id: string): Promise<void
   await gmailFetch(tokens, `/messages/${encodeURIComponent(id)}/trash`, {
     method: "POST",
   });
+  metaCache.delete(cacheKey(tokens, id));
 }
