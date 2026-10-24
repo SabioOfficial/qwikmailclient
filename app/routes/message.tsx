@@ -1,6 +1,7 @@
 import type { Route } from "./+types/message";
 import { data, Form, Link, redirect } from "react-router";
 import { EmailHtml } from "~/components/email-html";
+import { MessageStar } from "~/components/message-star";
 import { RelativeTime } from "~/components/relative-time";
 import { fullLabel } from "~/lib/address";
 import { getMailbox } from "~/lib/mailbox.server";
@@ -31,7 +32,10 @@ export default function Message({ loaderData }: Route.ComponentProps) {
       <p>
         <Link to={isSent ? "/sent" : "/"}>Back</Link>
       </p>
-      <h2>{email.subject}</h2>
+      <div className="message-title">
+        <h2>{email.subject}</h2>
+        <MessageStar key={email.id} id={email.id} starred={Boolean(email.starred)} />
+      </div>
       <dl className="message-meta">
         <dt>From</dt>
         <dd>{fullLabel(email.from)}</dd>

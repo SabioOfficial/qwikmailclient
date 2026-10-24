@@ -51,6 +51,7 @@ export default function Layout({ loaderData }: Route.ComponentProps) {
         <NavLink to="/" end>
           Inbox
         </NavLink>
+        <NavLink to="/favorites">Favorites</NavLink>
         <NavLink to="/sent">Sent</NavLink>
         <NavLink to="/compose">Compose</NavLink>
         <NavLink to="/settings">Settings</NavLink>

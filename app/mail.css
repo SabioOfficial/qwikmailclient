@@ -18,6 +18,7 @@
   --error: #b91c1c;
   --success: #15803d;
   --email-bg: #ffffff;
+  --star: #f95e0b;
 
   display: flex;
   min-height: 100dvh;
@@ -119,6 +120,46 @@
 
 .empty {
   color: var(--muted);
+}
+
+.email-item {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  align-items: center;
+}
+
+.email-item .email-row {
+  min-width: 0;
+}
+
+.star {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.email-item .star {
+  justify-self: center;
+}
+
+.star:hover,
+.star.starred {
+  color: var(--star);
+}
+
+.message-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.message-title h2 {
+  margin: 0;
 }
 
 .email-list {
