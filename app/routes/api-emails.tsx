@@ -11,7 +11,7 @@ export async function loader({ request }: Route.LoaderArgs): Promise<EmailPage |
   const folder = url.searchParams.get("folder");
   const pageToken = url.searchParams.get("pageToken");
 
-  if (folder !== "inbox" && folder !== "sent") return { error: "Unknown folder." };
+  if (folder !== "inbox" && folder !== "sent" && folder !== "starred") return { error: "Unknown folder." };
   if (pageToken && pageToken.length > 512) return { error: "Invalid page token." };
 
   try {

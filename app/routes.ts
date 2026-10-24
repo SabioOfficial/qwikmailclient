@@ -12,4 +12,5 @@ export default [
   route("auth/google/callback", "routes/auth-google-callback.tsx"),
   route("auth/logout", "routes/auth-logout.tsx"),
   route("api/emails", "routes/api-emails.tsx"),
+  route("api/star", "routes/api-star.tsx"),
 ] satisfies RouteConfig;

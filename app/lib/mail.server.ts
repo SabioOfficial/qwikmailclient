@@ -1,4 +1,5 @@
 export type Folder = "inbox" | "sent";
+export type ListFolder = Folder | "starred";
 
 export interface Email {
   id: string;
@@ -8,6 +9,7 @@ export interface Email {
   subject: string;
   body: string;
   html?: string;
+  starred?: boolean;
   date: string;
   read: boolean;
 }
@@ -69,4 +71,15 @@ export function sendEmail(input: {
 export function deleteEmail(id: string): void {
   const index = emails.findIndex((e) => e.id === id);
   if (index !== -1) emails.splice(index, 1);
+}
+
+export function listStarred(): Email[] {
+  return emails
+    .filter((e) => e.starred)
+    .sort((a, b) => b.date.localeCompare(a.date));
+}
+
+export function setStarred(id: string, starred: boolean): void {
+  const email = getEmail(id);
+  if (email) email.starred = starred;
 }

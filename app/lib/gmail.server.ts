@@ -1,10 +1,10 @@
 import { data } from "react-router";
 import { refreshAccessToken } from "./google.server";
-import type { Email, Folder } from "./mail.server";
+import type { Email, Folder, ListFolder } from "./mail.server";
 import type { GoogleTokens } from "./session.server";
 import type { EmailPage, SendInput } from "./mailbox.server";
 
-const LABELS: Record<Folder, string> = { inbox: "INBOX", sent: "SENT" };
+const LABELS: Record<ListFolder, string> = { inbox: "INBOX", sent: "SENT", starred: "STARRED" };
 
 interface LimiterState {
   spent: { at: number; cost: number }[];
@@ -249,6 +249,7 @@ function toEmail(msg: GmailMessage, folder?: Folder): Email {
     subject: header(msg, "Subject") || "(no subject)",
     body: extractBody(msg),
     html: findPart(msg.payload, "text/html") ?? undefined,
+    starred: labels.includes("STARRED"),
     date: new Date(Number(msg.internalDate)).toISOString(),
     read: !labels.includes("UNREAD"),
   };
@@ -258,7 +259,7 @@ function isNotFound(error: unknown): boolean {
   return typeof error === "object" && error !== null && "init" in error && (error as { init?: { status?: number } }).init?.status === 404;
 }
 
-export async function listGmail(tokens: GoogleTokens, folder: Folder, pageToken: string | null, pageSize: number): Promise<EmailPage> {
+export async function listGmail(tokens: GoogleTokens, folder: ListFolder, pageToken: string | null, pageSize: number): Promise<EmailPage> {
   const params = new URLSearchParams({ labelIds: LABELS[folder], maxResults: String(pageSize) });
   if (pageToken) params.set("pageToken", pageToken);
 
@@ -269,12 +270,12 @@ export async function listGmail(tokens: GoogleTokens, folder: Folder, pageToken:
 
   const found = await mapLimit(list.messages ?? [], 5, async ({ id }) => {
     const cached = cacheGet(tokens, id);
-    if (cached) return toEmail(cached, folder);
+    if (cached) return toEmail(cached, folder === "starred" ? undefined : folder);
 
     try {
       const msg = await gmailFetch<GmailMessage>(tokens, `/messages/${id}?format=metadata&metadataHeaders=From&metadataHeaders=To&metadataHeaders=Subject`);
       cacheSet(tokens, msg);
-      return toEmail(msg, folder);
+      return toEmail(msg, folder === "starred" ? undefined : folder);
     } catch (error) {
       if (isNotFound(error)) return null;
       throw error;
@@ -282,7 +283,9 @@ export async function listGmail(tokens: GoogleTokens, folder: Folder, pageToken:
   });
 
   return {
-    emails: found.filter((e): e is Email => e !== null),
+    emails: found
+      .filter((e): e is Email => e !== null)
+      .map((e) => (folder === "starred" ? { ...e, starred: true } : e)),
     nextPageToken: list.nextPageToken ?? null,
   };
 }
@@ -303,6 +306,19 @@ export async function markGmailRead(tokens: GoogleTokens, id: string): Promise<v
 
   const hit = metaCache.get(cacheKey(tokens, id));
   if (hit) hit.msg.labelIds = (hit.msg.labelIds ?? []).filter((l) => l !== "UNREAD");
+}
+
+export async function setGmailStarred(tokens: GoogleTokens, id: string, starred: boolean): Promise<void> {
+  await gmailFetch(tokens, `/messages/${encodeURIComponent(id)}/modify`, {
+    method: "POST",
+    body: JSON.stringify(starred ? { addLabelIds: ["STARRED"] } : { removeLabelIds: ["STARRED"] }),
+  });
+
+  const hit = metaCache.get(cacheKey(tokens, id));
+  if (hit) {
+    const labels = (hit.msg.labelIds ?? []).filter((l) => l !== "STARRED");
+    hit.msg.labelIds = starred ? [...labels, "STARRED"] : labels;
+  }
 }
 
 function cleanHeader(value: string): string {
