@@ -29,7 +29,7 @@ export default function Sent({ loaderData }: Route.ComponentProps) {
       ) : (
         <ul className="email-list">
           {emails.map((e) => (
-            <li key={e.id} className="email-list">
+            <li key={e.id} className="email-item">
               <StarButton starred={Boolean(e.starred)} onToggle={() => toggleStar(e.id)} />
               <Link to={`/message/${e.id}`} className="email-row">
                 <SenderAvatar value={e.to} />
