@@ -61,7 +61,7 @@ export default function Layout({ loaderData }: Route.ComponentProps) {
               <p className="account-email">{email}</p>
               <Form method="post" action="/auth/logout" reloadDocument>
                 <button type="submit" className="link-button">
-                  Disconnect GMail
+                  Disconnect Gmail
                 </button>
               </Form>
             </>
@@ -70,11 +70,11 @@ export default function Layout({ loaderData }: Route.ComponentProps) {
               <p className="account-hint">Demo mailbox</p>
               {gmailConfigured ? (
                 <a href="/auth/google" className="connect">
-                  Connect GMail
+                  Connect Gmail
                 </a>
               ) : (
                 <p className="account-hint">
-                  Add Google credentials to .env to enable GMail (temporary).
+                  Add Google credentials to .env to enable Gmail (temporary).
                 </p>
               )}
             </>
