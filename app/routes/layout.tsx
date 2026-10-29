@@ -46,15 +46,20 @@ export default function Layout({ loaderData }: Route.ComponentProps) {
 
   return (
     <div className="app" data-theme={theme}>
-      <nav className="sidebar">
-        <img src="QwikMailClient(1).png" className="mb-6 mt-4" />
-        <NavLink to="/" end>
-          Inbox
-        </NavLink>
-        <NavLink to="/favorites">Favorites</NavLink>
-        <NavLink to="/sent">Sent</NavLink>
-        <NavLink to="/compose">Compose</NavLink>
-        <NavLink to="/settings">Settings</NavLink>
+      <nav className="topbar">
+        <div className="topleftarea">
+          <div className="logo">
+            <img src="QwikMailClient(1).png" />
+            <p>by SabioOfficial</p>
+          </div>
+          <div className="topbar-thingy-section">
+            <NavLink to="/" end>Inbox</NavLink>
+            <NavLink to="/favorites">Favorites</NavLink>
+            <NavLink to="/sent">Sent</NavLink>
+            <NavLink to="/compose">Compose</NavLink>
+            <NavLink to="/settings">Settings</NavLink>
+          </div>
+        </div>
         <div className="account">
           {email ? (
             <>
