@@ -47,7 +47,7 @@ export default function Layout({ loaderData }: Route.ComponentProps) {
   return (
     <div className="app" data-theme={theme}>
       <nav className="sidebar">
-        <h1>QwikMailClient</h1>
+        <img src="QwikMailClient(1).png" className="mb-6 mt-4" />
         <NavLink to="/" end>
           Inbox
         </NavLink>
